@@ -1,0 +1,1 @@
+{"content":"一起好吗\r\n","username":"fumei","time":1506671484755,"ip":"::1","answer":[{"content":"哈","ip":"::1","time":1506671528072,"username":"fumei"}]}

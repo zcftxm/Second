@@ -1,0 +1,1 @@
+{"username":"fumei","password":"12345","check_psw":"12345","sex":"man","email":"123145@qq.com","scoure":"java","ip":"::1","time":1506671450598}

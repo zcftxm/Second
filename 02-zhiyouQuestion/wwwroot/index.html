@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>首页</title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap-3.3.7-dist/css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="css/all.css" />
+		<style type="text/css">
+			.dropdown-menu{
+				margin-top: -1px;
+				z-index: 1 !important;
+				min-width: 100px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container">
+				<div class="row" style="position: relative;">
+					<a href="#" class="navbar-brand">智游教育</a>
+					<div class="navbar-title pull-right">
+						<span id="ask">
+							<span class="glyphicon glyphicon-plus"></span> 提问
+						</span>
+						&#x3000;
+						<span id="user" data-toggle="dropdown">
+							<span class="glyphicon glyphicon-user"></span>
+						</span>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="user">
+							<li role="presentation">
+								<a role="menuitem" tabindex="-1" href="userInfo.html">个人资料</a>
+							</li>
+							<li role="presentation">
+								<a role="menuitem" tabindex="-1" href="#" id="outLogin">退出登录</a>
+							</li>
+
+						</ul>
+					</div>
+				</div>
+			</div>
+		</nav>
+		
+		<!--模态框-->
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="myModalLabel">退出登录-智游问答</h4>
+					</div>
+					<div class="modal-body">
+						<!--返回的内容-->
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<div class="questions"></div>
+		<script src="js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+		<script src="css/bootstrap-3.3.7-dist/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			//获取cookie
+			var username = $.cookie('username');
+			//判断cookie是否存在
+			if(username) {
+				$('#user').find('span').last().text(username);
+			}else{
+				$('#user').find('span').last().text('登录').parent().removeAttr('data-toggle').click(function() {
+					location.href = 'login.html';
+				})
+			}
+
+			$('#ask').click(function(){
+				if(username){
+					location.href = 'ask.html'
+				}else{
+					location.href = "login.html"
+				}
+			})
+			
+			$('#outLogin').click(function(e){
+				e.preventDefault();
+				$.get('/user/out',(data)=>{
+					$('.modal-body').html(data.msg);
+					$('#myModal').modal('show').on('hide.bs.modal',function(){
+							location.href = '/';
+					})
+				})
+			})
+			
+			$.get('/user/all',(data)=>{
+				console.log(data)
+				var StrHtml = '';
+				for(var i=0;i<data.length;i++){
+					var question = data[i];
+					StrHtml +=`
+						<div class="media container" data-question="${question.time}">
+							<div class="pull-left"><img src="../upload/${question.username}.jpg" onerror="defaultImg(this)" /></div>
+							<div class="media-body"><h4 class="media-heading">${question.username}</h4>${question.content}</div>
+							<div class="media-footering"><span>${setTime(question.time)} </span><span> ${setIP(question.ip)}</span></div>
+						</div>`;
+						console.log(question.answer)
+						if(question.answer){
+							for(var j=0;j<question.answer.length;j++){
+								var answer = question.answer[j];
+								StrHtml += `<div class="media container">
+									<div class="pull-right"><img src="../upload/${answer.username}.jpg" onerror="defaultImg(this)" /></div>
+									<div class="media-body" style="text-align:right"><h4 class="media-heading">${answer.username}</h4>${answer.content}</div>
+									<div class="media-footering" style="text-align:right"><span>${(answer.time)} </span><span> ${setIP(answer.ip)}</span></div>
+								</div>`
+							}
+						}
+				}
+				
+				$('.questions').html(StrHtml);
+			})
+			
+			//事件委托
+			
+			$('.questions').on('click','.media[data-question]',function(){
+				//alert('回答到'+$(this).attr('data-question'));
+				if(username){
+					//要将question存到cookie
+					$.cookie('question',$(this).data('question'));
+				
+					location.href = "answer.html";
+				}else{
+					location.href = "login.html"
+				}
+			})
+			
+			
+			//设置默认图片
+			function defaultImg(img){
+				$(img).attr('src','user.jpg')
+			}
+			
+			//事件转换
+			function setTime(t){
+				var time = new Date(t);
+				//年
+				var year = time.getFullYear();
+				//月
+				var month = time.getMonth()+1;
+				//日
+				var d = time.getDate();
+				
+				//时
+				var h = time.getHours();
+				
+				//分
+				var m = time.getMinutes();
+				
+				//拼接
+				var timeStr = year + '-' + month + '-' + d + '-' + h + '-' + m;
+				return timeStr;
+			}
+			
+			//封装一个解析IP
+			function setIP(ip){
+				if(ip.startsWith('::1')){
+					return 'localhost'
+				}else{
+					return ip.substr(7);
+				}
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,1 @@
+{"username":"cheng","password":"12345","check_psw":"12345","sex":"man","email":"123145@qq.com","scoure":"php","ip":"::1","time":1506652984405}
